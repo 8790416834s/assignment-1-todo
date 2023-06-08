@@ -4,7 +4,6 @@ module.exports = app;
 app.use(express.json());
 var format = require("date-fns/format");
 var isValid = require("date-fns/isValid");
-const bcrypt = require("bcrypt");
 const sqlite3 = require("sqlite3");
 const { open } = require("sqlite");
 const path = require("path");
@@ -124,10 +123,10 @@ app.get("/todos/:todoId/", async (request, response) => {
 //POST
 app.post("/todos/", async (request, response) => {
   let { id, todo, priority, status, category, dueDate } = request.body;
-  dueDate = format(new Date(dueDate), "yyyy-mm-dd");
+  dueDate = format(new Date(dueDate));
   const insertTodoQuery = `INSERT INTO 
     todo (id, todo, priority, status, category, due_date)
-    VALUES(${id}, '${todo}', '${priority}', '${status}', '${category}', ${dueDate});`;
+    VALUES(${id}, '${todo}', '${priority}', '${status}', '${category}', ${dueDate};`;
   const todoResponse = await db.run(insertTodoQuery);
   response.send("Todo Successfully Added");
 });
