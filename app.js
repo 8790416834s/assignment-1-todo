@@ -48,6 +48,10 @@ const hasCategoryProperty = (requestQuery) => {
   return requestQuery.category !== undefined;
 };
 
+const hasDueDateProperty = (requestQuery) => {
+  return requestQuery.due_date !== undefined;
+};
+
 app.get("/todos/", async (request, response) => {
   let data = null;
   let getTodosQuery = "";
@@ -67,7 +71,13 @@ app.get("/todos/", async (request, response) => {
     AND category = '${category}';`;
       break;
     case hasPriorityProperty(request.query):
-      getTodosQuery = `
+      const priorityArray = ["LOW", "MEDIUM", "HIGH"];
+      isPriorityValid = priorityArray.includes(priority);
+      if (isPriorityValid === false) {
+        response.status(400);
+        response.send("Invalid Todo Priority");
+      } else {
+        getTodosQuery = `
    SELECT
     *
    FROM
@@ -75,9 +85,16 @@ app.get("/todos/", async (request, response) => {
    WHERE
     todo LIKE '%${search_q}%'
     AND priority = '${priority}';`;
+      }
       break;
     case hasStatusProperty(request.query):
-      getTodosQuery = `
+      const statusArray = ["TO DO", "IN PROGRESS", "DONE"];
+      isStatusValid = statusArray.includes(status);
+      if (isStatusValid === false) {
+        response.status(400);
+        response.send("Invalid Todo Status");
+      } else {
+        getTodosQuery = `
    SELECT
     *
    FROM
@@ -85,9 +102,16 @@ app.get("/todos/", async (request, response) => {
    WHERE
     todo LIKE '%${search_q}%'
     AND status = '${status}';`;
+      }
       break;
     case hasCategoryProperty(request.query):
-      getTodosQuery = `
+      const categoryArray = ["HOME", "WORK"];
+      isCategoryValid = categoryArray.includes(category);
+      if (isStatusValid === false) {
+        response.status(400);
+        response.send("Invalid Todo Category");
+      } else {
+        getTodosQuery = `
    SELECT
     *
    FROM
@@ -95,6 +119,25 @@ app.get("/todos/", async (request, response) => {
    WHERE
     todo LIKE '%${search_q}%'
     AND category = '${category}';`;
+      }
+      break;
+    case hasDueDateProperty(request.query):
+      const dueDateArray = [
+        "2020-09-22",
+        "2021-02-22",
+        "2021-01-12",
+        "2021-04-02",
+      ];
+      isDueDateValid = dueDateArray.includes(dueDate);
+      if (isDueDateValid === false) {
+        response.status(400);
+        response.send("Invalid Todo DueDate");
+      } else {
+        getTodosQuery = `
+            SELECT * FROM todo
+            WHERE todo LIKE '%${search_q}%'
+            AND due_date = '${due_date}';`;
+      }
       break;
     default:
       getTodosQuery = `
@@ -194,10 +237,9 @@ app.put("/todos/:todoId/", async (request, response) => {
       priority='${priority}',
       status='${status}',
       category = '${category}',
-      due_date = ${due_date}
+      due_date = '${due_date}'
     WHERE
       id = ${todoId};`;
-
   await db.run(updateTodoQuery);
   response.send(`${updateColumn} Updated`);
 });
